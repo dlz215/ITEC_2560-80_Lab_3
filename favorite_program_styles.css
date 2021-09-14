@@ -1,0 +1,23 @@
+body {
+    padding: 10px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.code-block {
+    background-color: #ebeced;
+    width: 1100px;
+    margin-left: 30px;
+}
+
+.code-description {
+    margin-left: 30px;
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+}
+
+.jumbotron {
+    background-color: cadetblue;
+}

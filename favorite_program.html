@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Favorite Program</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+          integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <link rel="stylesheet" href="favorite_program_styles.css">
+</head>
+<body>
+
+<div class="jumbotron">
+    <h1>SQL Script: Gym Relationship Data</h1>
+</div>
+
+<div id="description">
+    <p>This is a SQL script I wrote at work using techniques I learned in Andy's SQL Server class which I took last
+        semester.To keep things simple - I do software support for a gym franchising company. We have a database table
+        that's used to set up business relationships between gyms in our network. Each unique relationship between two
+        gyms requires inserting 2 or 4 rows into the table. Whether it's 2 or 4 depends on certain factors including
+        whether the gyms are in the same state or not. We were previously using a script written by a former member of
+        our team, but we found that the script was inserting a lot of redundant rows each time we ran it. I borrowed
+        some pieces of their script but mostly wrote a new version that checks before inserting so no duplicate rows
+        are inserted.</p>
+
+    <p>Note: because the script contains names of servers, databases, and tables I prefer not to put it in a
+        public repository for security reasons.</p>
+</div>
+
+<div>
+    <p class="code-description">Enter IDs of 2 or more gyms. Relationships will be set up between each unique pair of
+        gyms (if one doesn't already exist). We have some large groups numbering over 100 that frequently need to have
+        one or two new gyms added.</p>
+    <div class="code-block">
+        <pre><code>
+            DECLARE @BillingNumbers NVARCHAR(MAX) = '' --BillingNumbers here
+
+            DECLARE @ClubTable1 TABLE (ClubID1 INT NOT NULL, StateProvince1 NVARCHAR(50) NOT NULL, DoorProcessed1 BIT,
+                TanningProcessed1 BIT)
+
+            INSERT INTO @ClubTable1 (ClubID1, StateProvince1, DoorProcessed1, TanningProcessed1)
+                SELECT ClubID,StateProvince, 0, 0 FROM Clubs WITH (NOLOCK) WHERE Number IN (SELECT LTRIM(RTRIM([Value]))
+                FROM dbo.Split(',', @BillingNumbers))
+        </code></pre>
+    </div>
+
+    <p class="code-description">Checks if an identical row already exists before inserting.</p>
+    <div class="code-block">
+        <pre><code>
+            SELECT TOP 1 @clubID2 = ClubID2 FROM @ClubTable2 WHERE DoorProcessed2 = 0
+                IF NOT EXISTS (SELECT 1 FROM ClubTrusts WHERE ClubID = @clubID1 AND TargetClubID = @clubID2 AND DoorID = 1)
+                    BEGIN
+                        INSERT INTO ClubTrusts (ClubTrustGUID, ClubId, DoorId, TargetClubId, Created, Updated, CreatedBy, UpdatedBy)
+                            SELECT NEWID(), @clubID1, 1, @clubID2, @now, @now, 11, 11
+                    END
+        </code></pre>
+    </div>
+</div>
+
+</body>
+</html>
